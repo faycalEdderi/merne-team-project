@@ -10,12 +10,21 @@ const registerUser = async (req, res) => {
   try {
     console.log(req.body);
     if (!req.body.password) {
-      return res.status(400).send({ error: "Password is required" });
+      return res.status(400).send({ error: "Le mot de passe est requis" });
     }
+
+    // Vérification de la confirmation du mot de passe
+    if (req.body.password !== req.body.confirmPassword) {
+      return res.status(400).send({ error: "Les mots de passe ne correspondent pas" });
+    }
+
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
+    // On retire confirmPassword avant de créer l'utilisateur
+    const { confirmPassword, ...userData } = req.body;
+    
     const user = new User({
-      ...req.body,
+      ...userData,
       password: hashedPassword,
     });
 
@@ -106,6 +115,10 @@ const updateUserProfile = async (req, res) => {
         
         // Si un nouveau mot de passe est fourni
         if (req.body.password) {
+            // Vérification de la confirmation du mot de passe
+            if (req.body.password !== req.body.confirmPassword) {
+                return res.status(400).send({ error: "Les mots de passe ne correspondent pas" });
+            }
             updates.password = await bcrypt.hash(req.body.password, 10);
         }
 
