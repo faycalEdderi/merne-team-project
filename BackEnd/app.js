@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
+const createDefaultAdmin = require("./InitProject/CreateAdmin");
 
 app.use(
     cors({
@@ -17,8 +18,13 @@ const PORT = 8080;
 
 const mongoose = require("mongoose");
 mongoose
-    .connect("mongodb://localhost:27017/MuscleHub", {})
-    .then(() => console.log("Connected to MongoDB"));
+    .connect("mongodb://localhost:27017/Baz'Art_Model", {})
+    .then(async () => {
+        console.log("Connecté à MongoDB !");
+
+        // Crée l'admin par défaut si nécessaire
+        await createDefaultAdmin();
+    });
 
 const routes = require("./routes");
 app.use("/", routes);
