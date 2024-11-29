@@ -1,65 +1,60 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import "../../Components/Auth.css";
-import Swal from "sweetalert2";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import '../../Components/Auth.css';
+import Swal from 'sweetalert2';
 
 const Register = () => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
-        username: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
+        username: '',
+        email: '',
+        password: ''
     });
-    const [error, setError] = useState("");
+    const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
     const handleChange = (e) => {
         setFormData({
             ...formData,
-            [e.target.name]: e.target.value,
+            [e.target.name]: e.target.value
         });
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-        setError("");
+        setError('');
 
         try {
-            if (formData.password !== formData.confirmPassword) {
-                setError("Les mots de passe ne correspondent pas");
-                setIsLoading(false);
-                return;
-            }
-            const response = await fetch("http://localhost:8080/register", {
-                method: "POST",
+            const response = await fetch('http://localhost:8080/register', {
+                method: 'POST',
                 headers: {
-                    "Content-Type": "application/json",
+                    'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(formData)
             });
 
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.error || "Erreur lors de l'inscription");
+                throw new Error(data.error || 'Erreur lors de l\'inscription');
             }
 
             await Swal.fire({
-                icon: "success",
-                title: "Inscription réussie!",
-                text: "Vous pouvez maintenant vous connecter",
+                icon: 'success',
+                title: 'Inscription réussie!',
+                text: 'Vous pouvez maintenant vous connecter',
                 timer: 2000,
-                showConfirmButton: false,
+                showConfirmButton: false
             });
 
-            navigate("/login");
+            navigate('/login');
+
         } catch (error) {
             Swal.fire({
-                icon: "error",
-                title: "Erreur",
-                text: error.message,
+                icon: 'error',
+                title: 'Erreur',
+                text: error.message
             });
         } finally {
             setIsLoading(false);
@@ -71,7 +66,7 @@ const Register = () => {
             <form className="auth-form" onSubmit={handleSubmit}>
                 <h2>Inscription</h2>
                 {error && <div className="error-message">{error}</div>}
-
+                
                 <div className="form-group">
                     <label>Nom d'utilisateur:</label>
                     <input
@@ -104,23 +99,13 @@ const Register = () => {
                         required
                     />
                 </div>
-                <div className="form-group">
-                    <label>Confirmer mot de passe:</label>
-                    <input
-                        type="password"
-                        name="confirmPassword"
-                        value={formData.confirmPassword}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
 
-                <button
-                    type="submit"
+                <button 
+                    type="submit" 
                     className="auth-button"
                     disabled={isLoading}
                 >
-                    {isLoading ? "Inscription..." : "S'inscrire"}
+                    {isLoading ? 'Inscription...' : 'S\'inscrire'}
                 </button>
             </form>
         </div>

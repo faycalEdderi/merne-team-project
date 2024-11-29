@@ -1,33 +1,30 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
-import "./Profile.css";
-import Swal from "sweetalert2";
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './Profile.css';
+import Swal from 'sweetalert2';
 
 const Profile = () => {
     const navigate = useNavigate();
     const [userData, setUserData] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({
-        username: "",
-        email: "",
-        oldPassword: "",
-        password: "",
-        confirmPassword: "",
+        username: '',
+        email: '',
+        password: ''
     });
-    const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
 
     const fetchUserProfile = useCallback(async () => {
         try {
-            const response = await fetch("http://localhost:8080/profile", {
-                method: "GET",
+            const response = await fetch('http://localhost:8080/profile', {
                 headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
             });
 
             if (!response.ok) {
-                throw new Error("Erreur lors de la récupération du profil");
+                throw new Error('Erreur lors de la récupération du profil');
             }
 
             const data = await response.json();
@@ -35,13 +32,13 @@ const Profile = () => {
             setFormData({
                 username: data.username,
                 email: data.email,
-                password: "",
+                password: ''
             });
         } catch (error) {
             setError(error.message);
-            if (error.message.includes("Non autorisé")) {
-                localStorage.removeItem("token");
-                navigate("/login");
+            if (error.message.includes('Non autorisé')) {
+                localStorage.removeItem('token');
+                navigate('/login');
             }
         }
     }, [navigate]);
@@ -52,116 +49,89 @@ const Profile = () => {
 
     const handleUpdate = async (e) => {
         e.preventDefault();
-        setError("");
-        setSuccess("");
-        // Frontend validation
-        if (formData.password !== formData.confirmPassword) {
-            Swal.fire({
-                icon: "error",
-                title: "Erreur",
-                text: "Les mots de passe ne correspondent pas",
-            });
-            return;
-        }
-        // If password is being changed, old password is required
-        if (formData.password && !formData.oldPassword) {
-            Swal.fire({
-                icon: "error",
-                title: "Erreur",
-                text: "Veuillez saisir votre ancien mot de passe",
-            });
-            return;
-        }
-        console.log("old password valid");
+        setError('');
+        setSuccess('');
+
         try {
             const updateData = {
-                username: formData.username,
-                email: formData.email,
-                // Include these only if password is being changed
-                ...(formData.password && {
-                    oldPassword: formData.oldPassword,
-                    password: formData.password,
-                }),
+                ...formData,
+                // N'inclure le mot de passe que s'il est fourni
+                ...(formData.password && { password: formData.password })
             };
-            console.log("updateData", updateData);
-            const response = await fetch("http://localhost:8080/profile", {
-                method: "PUT",
+
+            const response = await fetch('http://localhost:8080/profile', {
+                method: 'PUT',
                 headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
                 },
-                body: JSON.stringify(updateData),
+                body: JSON.stringify(updateData)
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(
-                    errorData.message ||
-                        "Erreur lors de la mise à jour du profil"
-                );
+                throw new Error('Erreur lors de la mise à jour du profil');
             }
 
             const data = await response.json();
             setUserData(data);
-
+            
             await Swal.fire({
-                icon: "success",
-                title: "Profil mis à jour!",
-                text: "Vos modifications ont été enregistrées avec succès",
+                icon: 'success',
+                title: 'Profil mis à jour!',
+                text: 'Vos modifications ont été enregistrées avec succès',
                 timer: 1500,
-                showConfirmButton: false,
+                showConfirmButton: false
             });
 
             setIsEditing(false);
         } catch (error) {
             Swal.fire({
-                icon: "error",
-                title: "Erreur",
-                text: error.message,
+                icon: 'error',
+                title: 'Erreur',
+                text: error.message
             });
         }
     };
 
     const handleDelete = async () => {
         const result = await Swal.fire({
-            title: "Êtes-vous sûr?",
+            title: 'Êtes-vous sûr?',
             text: "Cette action est irréversible!",
-            icon: "warning",
+            icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: "#d33",
-            cancelButtonColor: "#3085d6",
-            confirmButtonText: "Oui, supprimer!",
-            cancelButtonText: "Annuler",
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Oui, supprimer!',
+            cancelButtonText: 'Annuler'
         });
 
         if (result.isConfirmed) {
             try {
-                const response = await fetch(
-                    `http://localhost:8080/delete/${userData._id}`,
-                    {
-                        method: "DELETE",
-                        headers: {
-                            Authorization: `Bearer ${localStorage.getItem(
-                                "token"
-                            )}`,
-                        },
+                const response = await fetch(`http://localhost:8080/delete/${userData._id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
                     }
-                );
+                });
 
                 if (!response.ok) {
-                    throw new Error("Erreur lors de la suppression du compte");
+                    throw new Error('Erreur lors de la suppression du compte');
                 }
 
                 Swal.fire(
-                    "Supprimé!",
-                    "Votre compte a été supprimé avec succès.",
-                    "success"
+                    'Supprimé!',
+                    'Votre compte a été supprimé avec succès.',
+                    'success'
                 );
 
-                localStorage.removeItem("token");
-                navigate("/login");
+                localStorage.removeItem('token');
+                navigate('/login');
             } catch (error) {
-                Swal.fire("Erreur!", error.message, "error");
+                Swal.fire(
+                    'Erreur!',
+                    error.message,
+                    'error'
+                );
             }
         }
     };
@@ -186,15 +156,15 @@ const Profile = () => {
                         <label>Email:</label>
                         <p>{userData.email}</p>
                     </div>
-
+                    
                     <div className="profile-actions">
-                        <button
+                        <button 
                             className="edit-button"
                             onClick={() => setIsEditing(true)}
                         >
                             Modifier le profil
                         </button>
-                        <button
+                        <button 
                             className="delete-button"
                             onClick={handleDelete}
                         >
@@ -205,18 +175,13 @@ const Profile = () => {
             ) : (
                 <form className="profile-form" onSubmit={handleUpdate}>
                     <h2>Modifier le profil</h2>
-
+                    
                     <div className="form-group">
                         <label>Nom d'utilisateur:</label>
                         <input
                             type="text"
                             value={formData.username}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    username: e.target.value,
-                                })
-                            }
+                            onChange={(e) => setFormData({...formData, username: e.target.value})}
                             required
                         />
                     </div>
@@ -226,55 +191,18 @@ const Profile = () => {
                         <input
                             type="email"
                             value={formData.email}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    email: e.target.value,
-                                })
-                            }
+                            onChange={(e) => setFormData({...formData, email: e.target.value})}
                             required
                         />
                     </div>
-                    <div className="from-group">
-                        <label>Ancien mot de passe:</label>
-                        <input
-                            type="password"
-                            value={formData.oldPassword}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    oldPassword: e.target.value,
-                                })
-                            }
-                            required
-                        />
-                    </div>
+
                     <div className="form-group">
                         <label>Nouveau mot de passe (optionnel):</label>
                         <input
                             type="password"
                             value={formData.password}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    password: e.target.value,
-                                })
-                            }
+                            onChange={(e) => setFormData({...formData, password: e.target.value})}
                             placeholder="Laissez vide pour ne pas changer"
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label>Confirmer mot de passe:</label>
-                        <input
-                            type="password"
-                            value={formData.confirmPassword}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    confirmPassword: e.target.value,
-                                })
-                            }
-                            required
                         />
                     </div>
 
@@ -282,15 +210,15 @@ const Profile = () => {
                         <button type="submit" className="save-button">
                             Enregistrer
                         </button>
-                        <button
-                            type="button"
+                        <button 
+                            type="button" 
                             className="cancel-button"
                             onClick={() => {
                                 setIsEditing(false);
                                 setFormData({
                                     username: userData.username,
                                     email: userData.email,
-                                    password: "",
+                                    password: ''
                                 });
                             }}
                         >
