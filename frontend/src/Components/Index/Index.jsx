@@ -66,9 +66,10 @@ const Index = () => {
                 }
             });
             const data = await response.json();
-            setProducts(data);
+            setProducts(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error('Erreur:', error);
+            setProducts([]);
         }
     };
 
@@ -280,14 +281,14 @@ const Index = () => {
         }
     };
 
-    const filteredProducts = products.filter(product => {
+    const filteredProducts = Array.isArray(products) ? products.filter(product => {
         const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesCategory = !selectedCategory || product.category === selectedCategory;
         const matchesPrice = (!priceRange.min || product.price >= Number(priceRange.min)) &&
                            (!priceRange.max || product.price <= Number(priceRange.max));
         
         return matchesSearch && matchesCategory && matchesPrice;
-    });
+    }) : [];
 
     return (
         <div className="index-container">
