@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
-const createDefaultAdmin = require("./InitProject/CreateAdmin");
+const createDefaultAdmin = require("./CreateAdmin");
 
 app.use(
     cors({
