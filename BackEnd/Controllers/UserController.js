@@ -36,7 +36,7 @@ const registerUser = async (req, res) => {
 
         res.status(201).send(user);
     } catch (error) {
-        res.status(400).send({ error: error.message });
+        res.status(400).send({ error: "Erreur lors de la creation du compte." });
     }
 };
 
