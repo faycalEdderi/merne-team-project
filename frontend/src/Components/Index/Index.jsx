@@ -7,6 +7,7 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "./Index.css";
 import { jwtDecode } from "jwt-decode";
+import FilterBar from '../FilterBar/FitlerBar';
 
 const Index = () => {
     const [products, setProducts] = useState([]);
@@ -17,15 +18,31 @@ const Index = () => {
         name: "",
         description: "",
         price: "",
-        stock: "",
-        category: "Whey",
+        category: "Pulls",
+        size: "M",
         images: [],
         mainImage: "",
     });
     const [userId, setUserId] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("");
+    const [selectedSize, setSelectedSize] = useState("");
     const [priceRange, setPriceRange] = useState({ min: "", max: "" });
+
+    const categoryOptions = [
+        "Pulls",
+        "Jeans",
+        "T-shirt",
+        "Manteaux",
+        "Chaussures",
+        "Accessoires",
+        "Shorts",
+        "Chemises",
+        "Pantalons",
+        "Cargo"
+    ];
+
+    const sizeOptions = ["S", "M", "L", "XL"];
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -45,9 +62,7 @@ const Index = () => {
             try {
                 const response = await fetch("http://localhost:8080/profile", {
                     headers: {
-                        Authorization: `Bearer ${localStorage.getItem(
-                            "token"
-                        )}`,
+                        Authorization: `Bearer ${localStorage.getItem("token")}`,
                     },
                 });
                 const data = await response.json();
@@ -102,8 +117,8 @@ const Index = () => {
                 name: "",
                 description: "",
                 price: "",
-                stock: "",
-                category: "Whey",
+                category: "Pulls",
+                size: "M",
                 images: [],
                 mainImage: "",
             });
@@ -140,52 +155,39 @@ const Index = () => {
                 html: `
                     <div class="swal2-input-group">
                         <label for="swal-name">Nom</label>
-                        <input id="swal-name" class="swal2-input" value="${
-                            product.name
-                        }">
+                        <input id="swal-name" class="swal2-input" value="${product.name}">
                     </div>
                     <div class="swal2-input-group">
                         <label for="swal-price">Prix</label>
-                        <input id="swal-price" class="swal2-input" type="number" step="0.01" value="${
-                            product.price
-                        }">
-                    </div>
-                    <div class="swal2-input-group">
-                        <label for="swal-stock">Stock</label>
-                        <input id="swal-stock" class="swal2-input" type="number" value="${
-                            product.stock
-                        }">
+                        <input id="swal-price" class="swal2-input" type="number" step="0.01" value="${product.price}">
                     </div>
                     <div class="swal2-input-group">
                         <label for="swal-description">Description</label>
-                        <textarea id="swal-description" class="swal2-textarea">${
-                            product.description
-                        }</textarea>
+                        <textarea id="swal-description" class="swal2-textarea">${product.description}</textarea>
                     </div>
                     <div class="swal2-input-group">
                         <label for="swal-category">Catégorie</label>
                         <select id="swal-category" class="swal2-select">
-                            <option value="Whey" ${
-                                product.category === "Whey" ? "selected" : ""
-                            }>Whey</option>
-                            <option value="Gainer" ${
-                                product.category === "Gainer" ? "selected" : ""
-                            }>Gainer</option>
-                            <option value="Creatine" ${
-                                product.category === "Creatine"
-                                    ? "selected"
-                                    : ""
-                            }>Créatine</option>
-                            <option value="BCAA" ${
-                                product.category === "BCAA" ? "selected" : ""
-                            }>BCAA</option>
+                            ${categoryOptions.map(cat => `
+                                <option value="${cat}" ${product.category === cat ? "selected" : ""}>
+                                    ${cat}
+                                </option>
+                            `).join('')}
+                        </select>
+                    </div>
+                    <div class="swal2-input-group">
+                        <label for="swal-size">Taille</label>
+                        <select id="swal-size" class="swal2-select">
+                            ${sizeOptions.map(size => `
+                                <option value="${size}" ${product.size === size ? "selected" : ""}>
+                                    ${size}
+                                </option>
+                            `).join('')}
                         </select>
                     </div>
                     <div class="swal2-input-group">
                         <label for="swal-images">URLs des images (séparées par des virgules)</label>
-                        <input id="swal-images" class="swal2-input" value="${product.images.join(
-                            ", "
-                        )}">
+                        <input id="swal-images" class="swal2-input" value="${product.images.join(", ")}">
                     </div>
                 `,
                 focusConfirm: false,
@@ -195,28 +197,16 @@ const Index = () => {
                 preConfirm: () => {
                     const name = document.getElementById("swal-name").value;
                     const price = document.getElementById("swal-price").value;
-                    const stock = document.getElementById("swal-stock").value;
-                    const description =
-                        document.getElementById("swal-description").value;
-                    const category =
-                        document.getElementById("swal-category").value;
-                    const images = document
-                        .getElementById("swal-images")
-                        .value.split(",")
+                    const description = document.getElementById("swal-description").value;
+                    const category = document.getElementById("swal-category").value;
+                    const size = document.getElementById("swal-size").value;
+                    const images = document.getElementById("swal-images").value
+                        .split(",")
                         .map((url) => url.trim())
                         .filter((url) => url !== "");
 
-                    if (
-                        !name ||
-                        !price ||
-                        !stock ||
-                        !description ||
-                        !category ||
-                        images.length === 0
-                    ) {
-                        Swal.showValidationMessage(
-                            "Tous les champs sont requis"
-                        );
+                    if (!name || !price || !description || !category || !size || images.length === 0) {
+                        Swal.showValidationMessage("Tous les champs sont requis");
                         return false;
                     }
 
@@ -224,16 +214,11 @@ const Index = () => {
                         name,
                         description,
                         price: parseFloat(price),
-                        stock: parseInt(stock),
                         category,
+                        size,
                         images,
                         mainImage: images[0],
                     };
-                },
-                customClass: {
-                    input: "my-swal-input",
-                    textarea: "my-swal-textarea",
-                    select: "my-swal-select",
                 },
             });
 
@@ -244,9 +229,7 @@ const Index = () => {
                         method: "PUT",
                         headers: {
                             "Content-Type": "application/json",
-                            Authorization: `Bearer ${localStorage.getItem(
-                                "token"
-                            )}`,
+                            Authorization: `Bearer ${localStorage.getItem("token")}`,
                         },
                         body: JSON.stringify(formValues),
                     }
@@ -254,9 +237,7 @@ const Index = () => {
 
                 if (!response.ok) {
                     const error = await response.json();
-                    throw new Error(
-                        error.error || "Erreur lors de la modification"
-                    );
+                    throw new Error(error.error || "Erreur lors de la modification");
                 }
 
                 await Swal.fire({
@@ -267,7 +248,7 @@ const Index = () => {
                     showConfirmButton: false,
                 });
 
-                fetchProducts(); // Rafraîchir la liste
+                fetchProducts();
             }
         } catch (error) {
             console.error("Erreur:", error);
@@ -298,9 +279,7 @@ const Index = () => {
                     {
                         method: "DELETE",
                         headers: {
-                            Authorization: `Bearer ${localStorage.getItem(
-                                "token"
-                            )}`,
+                            Authorization: `Bearer ${localStorage.getItem("token")}`,
                         },
                     }
                 );
@@ -315,7 +294,7 @@ const Index = () => {
                     "success"
                 );
 
-                fetchProducts(); // Rafraîchir la liste
+                fetchProducts();
             }
         } catch (error) {
             Swal.fire("Erreur!", error.message, "error");
@@ -329,12 +308,13 @@ const Index = () => {
                   .includes(searchTerm.toLowerCase());
               const matchesCategory =
                   !selectedCategory || product.category === selectedCategory;
+              const matchesSize = 
+                  !selectedSize || product.size === selectedSize;
               const matchesPrice =
-                  (!priceRange.min ||
-                      product.price >= Number(priceRange.min)) &&
+                  (!priceRange.min || product.price >= Number(priceRange.min)) &&
                   (!priceRange.max || product.price <= Number(priceRange.max));
 
-              return matchesSearch && matchesCategory && matchesPrice;
+              return matchesSearch && matchesCategory && matchesSize && matchesPrice;
           })
         : [];
 
@@ -395,22 +375,6 @@ const Index = () => {
                                 step="0.01"
                             />
                         </div>
-
-                        <div className="form-group">
-                            <label>Stock:</label>
-                            <input
-                                type="number"
-                                value={formData.stock}
-                                onChange={(e) =>
-                                    setFormData({
-                                        ...formData,
-                                        stock: e.target.value,
-                                    })
-                                }
-                                required
-                                min="0"
-                            />
-                        </div>
                     </div>
 
                     <div className="form-group">
@@ -425,10 +389,27 @@ const Index = () => {
                             }
                             required
                         >
-                            <option value="Whey">Whey</option>
-                            <option value="Gainer">Gainer</option>
-                            <option value="Creatine">Créatine</option>
-                            <option value="BCAA">BCAA</option>
+                            {categoryOptions.map(cat => (
+                                <option key={cat} value={cat}>{cat}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="form-group">
+                        <label>Taille:</label>
+                        <select
+                            value={formData.size}
+                            onChange={(e) =>
+                                setFormData({
+                                    ...formData,
+                                    size: e.target.value,
+                                })
+                            }
+                            required
+                        >
+                            {sizeOptions.map(size => (
+                                <option key={size} value={size}>{size}</option>
+                            ))}
                         </select>
                     </div>
 
@@ -450,58 +431,16 @@ const Index = () => {
                 </form>
             )}
 
-            <div className="filters-container">
-                <div className="search-box">
-                    <input
-                        type="text"
-                        placeholder="Rechercher un produit..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="search-input"
-                    />
-                </div>
-
-                <div className="filter-group">
-                    <select
-                        value={selectedCategory}
-                        onChange={(e) => setSelectedCategory(e.target.value)}
-                        className="category-filter"
-                    >
-                        <option value="">Toutes les catégories</option>
-                        <option value="Whey">Whey</option>
-                        <option value="Gainer">Gainer</option>
-                        <option value="Creatine">Créatine</option>
-                        <option value="BCAA">BCAA</option>
-                    </select>
-                </div>
-
-                <div className="price-filter">
-                    <input
-                        type="number"
-                        placeholder="Prix min"
-                        value={priceRange.min}
-                        onChange={(e) =>
-                            setPriceRange({
-                                ...priceRange,
-                                min: e.target.value,
-                            })
-                        }
-                        className="price-input"
-                    />
-                    <input
-                        type="number"
-                        placeholder="Prix max"
-                        value={priceRange.max}
-                        onChange={(e) =>
-                            setPriceRange({
-                                ...priceRange,
-                                max: e.target.value,
-                            })
-                        }
-                        className="price-input"
-                    />
-                </div>
-            </div>
+            <FilterBar 
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                selectedCategory={selectedCategory}
+                setSelectedCategory={setSelectedCategory}
+                selectedSize={selectedSize}
+                setSelectedSize={setSelectedSize}
+                priceRange={priceRange}
+                setPriceRange={setPriceRange}
+            />
 
             <div className="products-container">
                 <h2>Nos Produits</h2>
@@ -522,41 +461,28 @@ const Index = () => {
                             <div className="product-card">
                                 <div className="image-gallery">
                                     <img
-                                        src={
-                                            product.mainImage ||
-                                            product.images[0]
-                                        }
+                                        src={product.mainImage || product.images[0]}
                                         alt={product.name}
                                         onError={(e) => {
                                             e.target.onerror = null;
-                                            e.target.src =
-                                                "chemin/vers/image/par/defaut.jpg";
+                                            e.target.src = "chemin/vers/image/par/defaut.jpg";
                                         }}
                                     />
                                 </div>
                                 <div className="product-info">
                                     <h3>{product.name}</h3>
-                                    <p className="category">
-                                        Catégorie : {product.category}
-                                    </p>
+                                    <p className="category">Catégorie : {product.category}</p>
+                                    <p className="size">Taille : {product.size}</p>
 
                                     <div className="description-container">
-                                        <p
-                                            className={`description ${
-                                                expandedDescriptions[
-                                                    product._id
-                                                ]
-                                                    ? "expanded"
-                                                    : ""
-                                            }`}
-                                        >
+                                        <p className={`description ${
+                                            expandedDescriptions[product._id] ? "expanded" : ""
+                                        }`}>
                                             {product.description}
                                         </p>
                                         <button
                                             className="description-toggle"
-                                            onClick={() =>
-                                                toggleDescription(product._id)
-                                            }
+                                            onClick={() => toggleDescription(product._id)}
                                         >
                                             {expandedDescriptions[product._id]
                                                 ? "Voir moins"
@@ -565,9 +491,6 @@ const Index = () => {
                                     </div>
 
                                     <p className="price">{product.price}€</p>
-                                    <p className="stock">
-                                        Stock: {product.stock}
-                                    </p>
 
                                     {isAdmin && product.owner && (
                                         <p className="owner">
@@ -578,24 +501,17 @@ const Index = () => {
                                     <div className="product-actions">
                                         {(isAdmin ||
                                             (product.owner &&
-                                                product.owner._id ===
-                                                    userId)) && (
+                                                product.owner._id === userId)) && (
                                             <>
                                                 <button
                                                     className="edit-btn"
-                                                    onClick={() =>
-                                                        handleEdit(product)
-                                                    }
+                                                    onClick={() => handleEdit(product)}
                                                 >
                                                     Modifier
                                                 </button>
                                                 <button
                                                     className="delete-btn"
-                                                    onClick={() =>
-                                                        handleDelete(
-                                                            product._id
-                                                        )
-                                                    }
+                                                    onClick={() => handleDelete(product._id)}
                                                 >
                                                     Supprimer
                                                 </button>
