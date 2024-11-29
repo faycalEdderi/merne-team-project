@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination } from "swiper/modules";
 import Swal from "sweetalert2";
 import "swiper/css";
 import "swiper/css/navigation";
-import "swiper/css/pagination";
 import "./Index.css";
 import { jwtDecode } from "jwt-decode";
-import FilterBar from '../FilterBar/FitlerBar';
+import FilterBar from "../FilterBar/FitlerBar";
+import Pagination from "../Pagination/Pagination";
 
 const Index = () => {
     const [products, setProducts] = useState([]);
@@ -28,6 +26,8 @@ const Index = () => {
     const [selectedCategory, setSelectedCategory] = useState("");
     const [selectedSize, setSelectedSize] = useState("");
     const [priceRange, setPriceRange] = useState({ min: "", max: "" });
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 3;
 
     const categoryOptions = [
         "Pulls",
@@ -39,7 +39,7 @@ const Index = () => {
         "Shorts",
         "Chemises",
         "Pantalons",
-        "Cargo"
+        "Cargo",
     ];
 
     const sizeOptions = ["S", "M", "L", "XL"];
@@ -62,7 +62,9 @@ const Index = () => {
             try {
                 const response = await fetch("http://localhost:8080/profile", {
                     headers: {
-                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                        Authorization: `Bearer ${localStorage.getItem(
+                            "token"
+                        )}`,
                     },
                 });
                 const data = await response.json();
@@ -155,39 +157,61 @@ const Index = () => {
                 html: `
                     <div class="swal2-input-group">
                         <label for="swal-name">Nom</label>
-                        <input id="swal-name" class="swal2-input" value="${product.name}">
+                        <input id="swal-name" class="swal2-input" value="${
+                            product.name
+                        }">
                     </div>
                     <div class="swal2-input-group">
                         <label for="swal-price">Prix</label>
-                        <input id="swal-price" class="swal2-input" type="number" step="0.01" value="${product.price}">
+                        <input id="swal-price" class="swal2-input" type="number" step="0.01" value="${
+                            product.price
+                        }">
                     </div>
                     <div class="swal2-input-group">
                         <label for="swal-description">Description</label>
-                        <textarea id="swal-description" class="swal2-textarea">${product.description}</textarea>
+                        <textarea id="swal-description" class="swal2-textarea">${
+                            product.description
+                        }</textarea>
                     </div>
                     <div class="swal2-input-group">
                         <label for="swal-category">Catégorie</label>
                         <select id="swal-category" class="swal2-select">
-                            ${categoryOptions.map(cat => `
-                                <option value="${cat}" ${product.category === cat ? "selected" : ""}>
+                            ${categoryOptions
+                                .map(
+                                    (cat) => `
+                                <option value="${cat}" ${
+                                        product.category === cat
+                                            ? "selected"
+                                            : ""
+                                    }>
                                     ${cat}
                                 </option>
-                            `).join('')}
+                            `
+                                )
+                                .join("")}
                         </select>
                     </div>
                     <div class="swal2-input-group">
                         <label for="swal-size">Taille</label>
                         <select id="swal-size" class="swal2-select">
-                            ${sizeOptions.map(size => `
-                                <option value="${size}" ${product.size === size ? "selected" : ""}>
+                            ${sizeOptions
+                                .map(
+                                    (size) => `
+                                <option value="${size}" ${
+                                        product.size === size ? "selected" : ""
+                                    }>
                                     ${size}
                                 </option>
-                            `).join('')}
+                            `
+                                )
+                                .join("")}
                         </select>
                     </div>
                     <div class="swal2-input-group">
                         <label for="swal-images">URLs des images (séparées par des virgules)</label>
-                        <input id="swal-images" class="swal2-input" value="${product.images.join(", ")}">
+                        <input id="swal-images" class="swal2-input" value="${product.images.join(
+                            ", "
+                        )}">
                     </div>
                 `,
                 focusConfirm: false,
@@ -197,16 +221,28 @@ const Index = () => {
                 preConfirm: () => {
                     const name = document.getElementById("swal-name").value;
                     const price = document.getElementById("swal-price").value;
-                    const description = document.getElementById("swal-description").value;
-                    const category = document.getElementById("swal-category").value;
+                    const description =
+                        document.getElementById("swal-description").value;
+                    const category =
+                        document.getElementById("swal-category").value;
                     const size = document.getElementById("swal-size").value;
-                    const images = document.getElementById("swal-images").value
-                        .split(",")
+                    const images = document
+                        .getElementById("swal-images")
+                        .value.split(",")
                         .map((url) => url.trim())
                         .filter((url) => url !== "");
 
-                    if (!name || !price || !description || !category || !size || images.length === 0) {
-                        Swal.showValidationMessage("Tous les champs sont requis");
+                    if (
+                        !name ||
+                        !price ||
+                        !description ||
+                        !category ||
+                        !size ||
+                        images.length === 0
+                    ) {
+                        Swal.showValidationMessage(
+                            "Tous les champs sont requis"
+                        );
                         return false;
                     }
 
@@ -229,7 +265,9 @@ const Index = () => {
                         method: "PUT",
                         headers: {
                             "Content-Type": "application/json",
-                            Authorization: `Bearer ${localStorage.getItem("token")}`,
+                            Authorization: `Bearer ${localStorage.getItem(
+                                "token"
+                            )}`,
                         },
                         body: JSON.stringify(formValues),
                     }
@@ -237,7 +275,9 @@ const Index = () => {
 
                 if (!response.ok) {
                     const error = await response.json();
-                    throw new Error(error.error || "Erreur lors de la modification");
+                    throw new Error(
+                        error.error || "Erreur lors de la modification"
+                    );
                 }
 
                 await Swal.fire({
@@ -279,7 +319,9 @@ const Index = () => {
                     {
                         method: "DELETE",
                         headers: {
-                            Authorization: `Bearer ${localStorage.getItem("token")}`,
+                            Authorization: `Bearer ${localStorage.getItem(
+                                "token"
+                            )}`,
                         },
                     }
                 );
@@ -308,15 +350,27 @@ const Index = () => {
                   .includes(searchTerm.toLowerCase());
               const matchesCategory =
                   !selectedCategory || product.category === selectedCategory;
-              const matchesSize = 
+              const matchesSize =
                   !selectedSize || product.size === selectedSize;
               const matchesPrice =
-                  (!priceRange.min || product.price >= Number(priceRange.min)) &&
+                  (!priceRange.min ||
+                      product.price >= Number(priceRange.min)) &&
                   (!priceRange.max || product.price <= Number(priceRange.max));
 
-              return matchesSearch && matchesCategory && matchesSize && matchesPrice;
+              return (
+                  matchesSearch &&
+                  matchesCategory &&
+                  matchesSize &&
+                  matchesPrice
+              );
           })
         : [];
+
+    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+    const displayedProducts = filteredProducts.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
 
     return (
         <div className="index-container">
@@ -389,8 +443,10 @@ const Index = () => {
                             }
                             required
                         >
-                            {categoryOptions.map(cat => (
-                                <option key={cat} value={cat}>{cat}</option>
+                            {categoryOptions.map((cat) => (
+                                <option key={cat} value={cat}>
+                                    {cat}
+                                </option>
                             ))}
                         </select>
                     </div>
@@ -407,8 +463,10 @@ const Index = () => {
                             }
                             required
                         >
-                            {sizeOptions.map(size => (
-                                <option key={size} value={size}>{size}</option>
+                            {sizeOptions.map((size) => (
+                                <option key={size} value={size}>
+                                    {size}
+                                </option>
                             ))}
                         </select>
                     </div>
@@ -431,7 +489,7 @@ const Index = () => {
                 </form>
             )}
 
-            <FilterBar 
+            <FilterBar
                 searchTerm={searchTerm}
                 setSearchTerm={setSearchTerm}
                 selectedCategory={selectedCategory}
@@ -444,85 +502,90 @@ const Index = () => {
 
             <div className="products-container">
                 <h2>Nos Produits</h2>
-                <Swiper
-                    modules={[Navigation, Pagination]}
-                    spaceBetween={30}
-                    slidesPerView={3}
-                    navigation
-                    pagination={{ clickable: true }}
-                    breakpoints={{
-                        320: { slidesPerView: 1 },
-                        768: { slidesPerView: 2 },
-                        1024: { slidesPerView: 3 },
-                    }}
-                >
-                    {filteredProducts.map((product) => (
-                        <SwiperSlide key={product._id}>
-                            <div className="product-card">
-                                <div className="image-gallery">
-                                    <img
-                                        src={product.mainImage || product.images[0]}
-                                        alt={product.name}
-                                        onError={(e) => {
-                                            e.target.onerror = null;
-                                            e.target.src = "chemin/vers/image/par/defaut.jpg";
-                                        }}
-                                    />
+                <div className="product-list">
+                    {displayedProducts.map((product) => (
+                        <div key={product._id} className="product-card">
+                            <div className="image-gallery">
+                                <img
+                                    src={product.mainImage || product.images[0]}
+                                    alt={product.name}
+                                    onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src =
+                                            "chemin/vers/image/par/defaut.jpg";
+                                    }}
+                                />
+                            </div>
+                            <div className="product-info">
+                                <h3>{product.name}</h3>
+                                <p className="category">
+                                    Catégorie : {product.category}
+                                </p>
+                                <p className="size">Taille : {product.size}</p>
+
+                                <div className="description-container">
+                                    <p
+                                        className={`description ${
+                                            expandedDescriptions[product._id]
+                                                ? "expanded"
+                                                : ""
+                                        }`}
+                                    >
+                                        {product.description}
+                                    </p>
+                                    <button
+                                        className="description-toggle"
+                                        onClick={() =>
+                                            toggleDescription(product._id)
+                                        }
+                                    >
+                                        {expandedDescriptions[product._id]
+                                            ? "Voir moins"
+                                            : "Voir plus"}
+                                    </button>
                                 </div>
-                                <div className="product-info">
-                                    <h3>{product.name}</h3>
-                                    <p className="category">Catégorie : {product.category}</p>
-                                    <p className="size">Taille : {product.size}</p>
 
-                                    <div className="description-container">
-                                        <p className={`description ${
-                                            expandedDescriptions[product._id] ? "expanded" : ""
-                                        }`}>
-                                            {product.description}
-                                        </p>
-                                        <button
-                                            className="description-toggle"
-                                            onClick={() => toggleDescription(product._id)}
-                                        >
-                                            {expandedDescriptions[product._id]
-                                                ? "Voir moins"
-                                                : "Voir plus"}
-                                        </button>
-                                    </div>
+                                <p className="price">{product.price}€</p>
 
-                                    <p className="price">{product.price}€</p>
+                                {isAdmin && product.owner && (
+                                    <p className="owner">
+                                        Ajouté par: {product.owner.username}
+                                    </p>
+                                )}
 
-                                    {isAdmin && product.owner && (
-                                        <p className="owner">
-                                            Ajouté par: {product.owner.username}
-                                        </p>
+                                <div className="product-actions">
+                                    {(isAdmin ||
+                                        (product.owner &&
+                                            product.owner._id === userId)) && (
+                                        <>
+                                            <button
+                                                className="edit-btn"
+                                                onClick={() =>
+                                                    handleEdit(product)
+                                                }
+                                            >
+                                                Modifier
+                                            </button>
+                                            <button
+                                                className="delete-btn"
+                                                onClick={() =>
+                                                    handleDelete(product._id)
+                                                }
+                                            >
+                                                Supprimer
+                                            </button>
+                                        </>
                                     )}
-
-                                    <div className="product-actions">
-                                        {(isAdmin ||
-                                            (product.owner &&
-                                                product.owner._id === userId)) && (
-                                            <>
-                                                <button
-                                                    className="edit-btn"
-                                                    onClick={() => handleEdit(product)}
-                                                >
-                                                    Modifier
-                                                </button>
-                                                <button
-                                                    className="delete-btn"
-                                                    onClick={() => handleDelete(product._id)}
-                                                >
-                                                    Supprimer
-                                                </button>
-                                            </>
-                                        )}
-                                    </div>
                                 </div>
                             </div>
-                        </SwiperSlide>
+                        </div>
                     ))}
-                </Swiper>
+                </div>
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                />
             </div>
         </div>
     );

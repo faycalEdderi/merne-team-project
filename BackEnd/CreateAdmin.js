@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const User = require("../Models/UserModel");
+const User = require("./Models/UserModel");
 const bcrypt = require("bcrypt");
 
 async function createDefaultAdmin() {
