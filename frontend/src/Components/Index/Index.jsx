@@ -7,6 +7,7 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "./Index.css";
 import { jwtDecode } from "jwt-decode";
+import FilterBar from '../FilterBar/FitlerBar';
 
 const Index = () => {
     const [products, setProducts] = useState([]);
@@ -430,70 +431,16 @@ const Index = () => {
                 </form>
             )}
 
-            <div className="filters-container">
-                <div className="search-box">
-                    <input
-                        type="text"
-                        placeholder="Rechercher un produit..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="search-input"
-                    />
-                </div>
-
-                <div className="filter-group">
-                    <select
-                        value={selectedCategory}
-                        onChange={(e) => setSelectedCategory(e.target.value)}
-                        className="category-filter"
-                    >
-                        <option value="">Toutes les catégories</option>
-                        {categoryOptions.map(cat => (
-                            <option key={cat} value={cat}>{cat}</option>
-                        ))}
-                    </select>
-                </div>
-
-                <div className="filter-group">
-                    <select
-                        value={selectedSize}
-                        onChange={(e) => setSelectedSize(e.target.value)}
-                        className="size-filter"
-                    >
-                        <option value="">Toutes les tailles</option>
-                        {sizeOptions.map(size => (
-                            <option key={size} value={size}>{size}</option>
-                        ))}
-                    </select>
-                </div>
-
-                <div className="price-filter">
-                    <input
-                        type="number"
-                        placeholder="Prix min"
-                        value={priceRange.min}
-                        onChange={(e) =>
-                            setPriceRange({
-                                ...priceRange,
-                                min: e.target.value,
-                            })
-                        }
-                        className="price-input"
-                    />
-                    <input
-                        type="number"
-                        placeholder="Prix max"
-                        value={priceRange.max}
-                        onChange={(e) =>
-                            setPriceRange({
-                                ...priceRange,
-                                max: e.target.value,
-                            })
-                        }
-                        className="price-input"
-                    />
-                </div>
-            </div>
+            <FilterBar 
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                selectedCategory={selectedCategory}
+                setSelectedCategory={setSelectedCategory}
+                selectedSize={selectedSize}
+                setSelectedSize={setSelectedSize}
+                priceRange={priceRange}
+                setPriceRange={setPriceRange}
+            />
 
             <div className="products-container">
                 <h2>Nos Produits</h2>
